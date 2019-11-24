@@ -1,0 +1,1 @@
+g++ -c -o ../src/main.o ../src/main.cpp -g -std=c++17 -I../include -I/home/daniel/1.1.126.0/x86_64/include -L/home/daniel/1.1.126.0/x86_64/lib `pkg-config --static --libs glfw3` -lvulkan
