@@ -10,7 +10,7 @@ _OBJ = main.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 LDFLAGS = -L$(VULKAN_SDK_PATH)/lib `pkg-config --static --libs glfw3` -lvulkan
-
+VK_LAYER_PATH=
 all: VulkanTest
 
 
@@ -21,13 +21,19 @@ VulkanTest: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
  
 
-.PHONY: test clean
+.PHONY: test re ret clean
 
-test:  main
+test: VulkanTest 
+	LD_LIBRARY_PATH=$(VULKAN_SDK_PATH)/lib VK_LAYER_PATH=$(VULKAN_SDK_PATH)/etc/vulkan/explicit_layer.d ./VulkanTest
+
+re:
 	rm -f $(ODIR)/*.o
 	make
+
+ret: VulkanTest
 	rm -f $(ODIR)/*.o
-	./main	
+	make
+	LD_LIBRARY_PATH=$(VULKAN_SDK_PATH)/lib VK_LAYER_PATH=$(VULKAN_SDK_PATH)/etc/vulkan/explicit_layer.d ./VulkanTest
 
 clean:
 	rm -f $(ODIR)/*.o
