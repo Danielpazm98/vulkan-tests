@@ -1,7 +1,8 @@
 VULKAN_SDK_PATH = /home/daniel/1.1.126.0/x86_64
+STB_INCLUDE_PATH = ../lib
 
 CC=g++
-CFLAGS = -g -std=c++17 -I$(IDIR) -I$(VULKAN_SDK_PATH)/include -fpermissive
+CFLAGS = -g -std=c++17 -I$(IDIR) -I$(VULKAN_SDK_PATH)/include -I$(STB_INCLUDE_PATH) -fpermissive
 
 ODIR=../src
 IDIR =../include
@@ -10,7 +11,6 @@ _OBJ = main.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 LDFLAGS = -L$(VULKAN_SDK_PATH)/lib `pkg-config --static --libs glfw3` -lvulkan
-VK_LAYER_PATH=
 all: VulkanTest
 
 
