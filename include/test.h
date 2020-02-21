@@ -1,5 +1,6 @@
 #include <vulkan/vulkan.h>
 
+#define GLM_FORCE_RADIANS
 #include <iostream>
 #include <stdexcept>
 #include <set>
@@ -16,7 +17,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <chrono>
 
-#define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 
 const int WIDTH = 800;
@@ -107,7 +107,9 @@ class HelloTriangleApplication {
     public:
         void run() {
             initWindow();
+            std::cout << "\nInit Vulkan: Start\n\n";
             initVulkan();
+            std::cout << "\nMain loop: start\n\n";
             mainLoop();
             cleanup();
         }
@@ -191,21 +193,37 @@ class HelloTriangleApplication {
             setupDebugMessenger();
             createSurface();
             pickPhysicalDevice();
+            std::cout << "Physical device picked\n";
             createLogicalDevice();
+            std::cout << "Logical device created\n";
             createSwapChain();
+            std::cout << "Swapchain created\n";
             createImageViews();
+            std::cout << "ImageViews created\n";
             createRenderPass();
+            std::cout << "RenderPass created\n";
             createDescriptorSetLayout();
+            std::cout << "DescriptorSetLayout created\n";
             createGraphicsPipeline();
+            std::cout << "GraphicsPipeline created\n";
             createFramebuffers();
+            std::cout << "Framebuffers created\n";
             createCommandPool();
+            std::cout << "CommandPool created\n";
             createVertexBuffer();
+            std::cout << "VertexBuffer created\n";
             createIndexBuffer();
+            std::cout << "IndexBuffer created\n";
             createUniformBuffers();
+            std::cout << "UniformBuffers created\n";
             createDescriptorPool();
+            std::cout << "DescriptorPool created\n";
             createDescriptorSets();
+            std::cout << "DescriptorSets Created\n";
             createCommandBuffers();
+            std::cout << "CommandBuffers created\n";
             createSyncObjects();
+            std::cout << "SyncObjects created\n";
         }
 
         void mainLoop() {
@@ -1018,6 +1036,7 @@ class HelloTriangleApplication {
                 vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, offsets);
                 vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
+
                 vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
                 vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
@@ -1051,31 +1070,33 @@ class HelloTriangleApplication {
         }
 
         void drawFrame() {
+            std::cout << "Empieza a escribir frame\n";
             vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
             uint32_t imageIndex;
             VkResult result = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvaiableSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
             if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-                framebufferResized = false;
                 recreateSwapChain();
                 return;
             } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
                 throw std::runtime_error("failed to acquire swap chain image");
             }
+            
+            updateUniformBuffer(imageIndex);
 
             if (imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
                 vkWaitForFences(device, 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
             }
-            imagesInFlight[imageIndex] = inFlightFences[currentFrame];
 
-            updateUniformBuffer(imageIndex);
+            imagesInFlight[imageIndex] = inFlightFences[currentFrame];
 
             VkSubmitInfo submitInfo = {};
             submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
             VkSemaphore waitSemaphores[] = {imageAvaiableSemaphore[currentFrame]};
             VkPipelineStageFlags waitStages[] =  {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+
             submitInfo.waitSemaphoreCount = 1;
             submitInfo.pWaitSemaphores = waitSemaphores;
             submitInfo.pWaitDstStageMask = waitStages;
@@ -1088,6 +1109,7 @@ class HelloTriangleApplication {
             submitInfo.pSignalSemaphores = signalSemaphores;
 
             vkResetFences(device, 1, &inFlightFences[currentFrame]);
+
             if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to submit draw command fubber!");
             }
@@ -1106,14 +1128,16 @@ class HelloTriangleApplication {
 
             result = vkQueuePresentKHR(presentQueue, &presentInfo);
 
+
             if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
                 framebufferResized = false;
                 recreateSwapChain();
+                std::cout << "Termina de recrear la cadena de swap\n";
             } else if (result != VK_SUCCESS) {
                 throw std::runtime_error("Failed to present swap chain image!");
             }
-            
-            vkQueueWaitIdle(presentQueue);
+
+
 
             currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 
@@ -1121,6 +1145,8 @@ class HelloTriangleApplication {
 
 
         void recreateSwapChain() {
+            std::cout << "\nRecreando cadena de swap\n\n";
+
             int width = 0, height = 0;
             glfwGetFramebufferSize(window, &width, &height);
             while (width == 0 || height == 0) {
@@ -1129,18 +1155,29 @@ class HelloTriangleApplication {
             }
 
             vkDeviceWaitIdle(device);
+            std::cout << "Termina de esperar en idle\n";
 
             cleanupSwapChain();
+            std::cout << "Termina de limpiar la swapchain\n";
 
             createSwapChain();
+            std::cout << "Termina de crear la swapChain\n";
             createImageViews();
+            std::cout << "Termina de crear las imageView\n";
             createRenderPass();
+            std::cout << "Termina de crear el renderPass\n";
             createGraphicsPipeline();
+            std::cout << "Termina de crear el graphicsPipeline\n";
             createFramebuffers();
-            createCommandBuffers();
+            std::cout << "Termina de crear los frameBuffers\n";
             createUniformBuffers();
+            std::cout << "Termina de crear los UniformBuffers\n";
             createDescriptorPool();
+            std::cout << "Termina de crear el DescriptorPool\n";
             createDescriptorSets();
+            std::cout << "Termina de crear el descriptorsets\n";
+            createCommandBuffers();
+            std::cout << "Termina de crcrear los commandbuffers\n\n";
         }
 
         void createVertexBuffer() {
