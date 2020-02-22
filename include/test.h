@@ -143,7 +143,7 @@ class HelloTriangleApplication {
         VkCommandPool commandPool;
         std::vector<VkCommandBuffer> commandBuffers;
 
-        std::vector<VkSemaphore> imageAvaiableSemaphore;
+        std::vector<VkSemaphore> imageAvailableSemaphores;
         std::vector<VkSemaphore> renderFinishedSemaphore;
         std::vector<VkFence> inFlightFences;
         std::vector<VkFence> imagesInFlight;
@@ -249,7 +249,7 @@ class HelloTriangleApplication {
 
             for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
                 vkDestroySemaphore(device, renderFinishedSemaphore[i], nullptr);
-                vkDestroySemaphore(device, imageAvaiableSemaphore[i], nullptr);
+                vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
                 vkDestroyFence(device, inFlightFences[i], nullptr);
             }
 
@@ -299,7 +299,7 @@ class HelloTriangleApplication {
         void createInstance() {
 
             if (enableValidationLayers && !checkValidationLayerSupport()){
-                std::runtime_error("Validation layers requested, but not avaiable!");
+                std::runtime_error("Validation layers requested, but not available!");
             }
 
             VkApplicationInfo appInfo = {};
@@ -344,13 +344,13 @@ class HelloTriangleApplication {
             uint32_t layerCount;
             vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
-            std::vector<VkLayerProperties> avaiableLayers(layerCount);
-            vkEnumerateInstanceLayerProperties(&layerCount, avaiableLayers.data());
+            std::vector<VkLayerProperties> availableLayers(layerCount);
+            vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
             for (const char* layerName : validationLayers) {
                 bool layerFound = false;
 
-                for (const auto& layerProperties : avaiableLayers) {
+                for (const auto& layerProperties : availableLayers) {
                     if (strcmp(layerName, layerProperties.layerName) == 0) {
                         layerFound = true;
                         break;
@@ -452,12 +452,12 @@ class HelloTriangleApplication {
             uint32_t extensionCount = 0;
             vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
 
-            std::vector<VkExtensionProperties> avaiableExtensions(extensionCount);
-            vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, avaiableExtensions.data());
+            std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+            vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
 
             std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
-            for (const auto& extension : avaiableExtensions) {
+            for (const auto& extension : availableExtensions) {
                 requiredExtensions.erase(extension.extensionName);
             }
 
@@ -582,22 +582,22 @@ class HelloTriangleApplication {
             return details;
         }
 
-        VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& avaiableFormats) {
+        VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
 
-            for (const auto& avaiableFormat : avaiableFormats) {
-                if (avaiableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && avaiableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
-                    return avaiableFormat;
+            for (const auto& availableFormat : availableFormats) {
+                if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+                    return availableFormat;
                 }
             }
 
-            return avaiableFormats[0];
+            return availableFormats[0];
         }
 
-        VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& avaiablePresentModes) {
+        VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
 
-            for (const auto& avaiablePresentMode : avaiablePresentModes) {
-                if (avaiablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-                    return avaiablePresentMode;
+            for (const auto& availablePresentMode : availablePresentModes) {
+                if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
+                    return availablePresentMode;
                 }
             }
 
@@ -1049,7 +1049,7 @@ class HelloTriangleApplication {
         }
 
         void createSyncObjects() {
-            imageAvaiableSemaphore.resize(MAX_FRAMES_IN_FLIGHT);
+            imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
             renderFinishedSemaphore.resize(MAX_FRAMES_IN_FLIGHT);
             inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
             imagesInFlight.resize(swapChainImages.size(), VK_NULL_HANDLE);
@@ -1063,7 +1063,7 @@ class HelloTriangleApplication {
 
             for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 
-                if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvaiableSemaphore[i]) != VK_SUCCESS || vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphore[i]) != VK_SUCCESS || vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
+                if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS || vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphore[i]) != VK_SUCCESS || vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
                     throw std::runtime_error("Failed to create semaphores!");
                 } 
             }
@@ -1074,7 +1074,7 @@ class HelloTriangleApplication {
             vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
             uint32_t imageIndex;
-            VkResult result = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvaiableSemaphore[currentFrame], VK_NULL_HANDLE, &imageIndex);
+            VkResult result = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
             if (result == VK_ERROR_OUT_OF_DATE_KHR) {
                 recreateSwapChain();
@@ -1094,7 +1094,7 @@ class HelloTriangleApplication {
             VkSubmitInfo submitInfo = {};
             submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-            VkSemaphore waitSemaphores[] = {imageAvaiableSemaphore[currentFrame]};
+            VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[currentFrame]};
             VkPipelineStageFlags waitStages[] =  {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 
             submitInfo.waitSemaphoreCount = 1;
@@ -1136,8 +1136,6 @@ class HelloTriangleApplication {
             } else if (result != VK_SUCCESS) {
                 throw std::runtime_error("Failed to present swap chain image!");
             }
-
-
 
             currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 
