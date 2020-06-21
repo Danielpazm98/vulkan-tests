@@ -28,6 +28,7 @@ test: VulkanTest
 
 re:
 	rm -f $(ODIR)/*.o
+	./compile.sh
 	make
 
 ret: VulkanTest
