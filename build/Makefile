@@ -2,7 +2,8 @@ VULKAN_SDK_PATH = /home/daniel/1.1.126.0/x86_64
 LIB_INCLUDE_PATH = ../lib
 
 CC=g++
-CFLAGS = -g -std=c++17 -I$(IDIR) -I$(VULKAN_SDK_PATH)/include -I$(LIB_INCLUDE_PATH) -fpermissive
+CFLAGS = -g -std=c++17 -O3 -I$(IDIR) -I$(VULKAN_SDK_PATH)/include -I$(LIB_INCLUDE_PATH) -fpermissive
+OPTIMIZEFLAGS = -O3
 
 ODIR=../src
 IDIR =../include
@@ -20,6 +21,8 @@ $(ODIR)/main.o: $(ODIR)/main.cpp
 VulkanTest: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
  
+Optimized: $(OBJ)
+	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS) $(OPTIMIZEFLAGS)
 
 .PHONY: test re ret clean
 
